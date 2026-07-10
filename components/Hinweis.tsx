@@ -14,6 +14,8 @@ const TEXTE: Record<string, string> = {
   "link-ungueltig":
     "Dieser Link ist ungültig oder abgelaufen. Bitte fordere einen neuen an.",
   "nicht-berechtigt": "Dafür fehlt dir die Berechtigung.",
+  "zu-lang": "Einer der Texte ist zu lang. Bitte kürze ihn.",
+  "avatar-url": "Die Bild-URL muss mit https:// beginnen.",
   unbekannt: "Das hat leider nicht geklappt. Bitte versuche es noch einmal.",
   // Hinweise
   bestaetigen:
@@ -21,6 +23,7 @@ const TEXTE: Record<string, string> = {
   gesendet:
     "Wenn ein Konto mit dieser Adresse existiert, haben wir dir einen Link zum Zurücksetzen geschickt.",
   "passwort-geaendert": "Dein Passwort wurde geändert.",
+  gespeichert: "Gespeichert!",
 };
 
 export function Fehler({ code }: { code?: string }) {
