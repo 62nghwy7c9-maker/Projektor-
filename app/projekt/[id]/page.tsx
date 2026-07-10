@@ -18,6 +18,7 @@ import {
   updatePosten,
 } from "@/app/projekt/ideen-actions";
 import type { ProjectUpdate } from "@/lib/types";
+import ReportButton from "@/components/ReportButton";
 
 export const metadata = { title: "Projekt — Projector" };
 
@@ -128,10 +129,18 @@ export default async function ProjektSeite({
           <h1 className="text-3xl font-bold tracking-tight">
             {projekt.title}
           </h1>
-          {istHost && (
+          {istHost ? (
             <Link href={`/projekt/${projekt.id}/bearbeiten`} className="btn">
               Bearbeiten
             </Link>
+          ) : (
+            user && (
+              <ReportButton
+                typ="project"
+                zielId={projekt.id}
+                zurueck={`/projekt/${projekt.id}`}
+              />
+            )
           )}
         </div>
         {host && (

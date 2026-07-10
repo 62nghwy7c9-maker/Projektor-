@@ -9,6 +9,7 @@ import {
   sternUmschalten,
   voteUmschalten,
 } from "@/app/projekt/ideen-actions";
+import ReportButton from "@/components/ReportButton";
 
 export type AutorKurz = Pick<Profile, "id" | "display_name" | "avatar_url">;
 export type IdeeMitDetails = Idea & {
@@ -175,6 +176,13 @@ export default function IdeaItem({
             </form>
           </>
         )}
+        {userId && !istAutor && (
+          <ReportButton
+            typ="idea"
+            zielId={idee.id}
+            zurueck={`/projekt/${projektId}`}
+          />
+        )}
       </div>
 
       {/* Antworten — flach, genau eine Ebene */}
@@ -191,19 +199,28 @@ export default function IdeaItem({
                 )}
               </div>
               <p className="whitespace-pre-line text-sm">{antwort.body}</p>
-              {userId === antwort.author_id && (
-                <form action={antwortLoeschen}>
-                  <input type="hidden" name="antwort_id" value={antwort.id} />
-                  <input type="hidden" name="idee_id" value={idee.id} />
-                  <input type="hidden" name="projekt_id" value={projektId} />
-                  <button
-                    type="submit"
-                    className="text-xs text-muted hover:underline"
-                  >
-                    Löschen
-                  </button>
-                </form>
-              )}
+              <div className="flex gap-3">
+                {userId === antwort.author_id && (
+                  <form action={antwortLoeschen}>
+                    <input type="hidden" name="antwort_id" value={antwort.id} />
+                    <input type="hidden" name="idee_id" value={idee.id} />
+                    <input type="hidden" name="projekt_id" value={projektId} />
+                    <button
+                      type="submit"
+                      className="text-xs text-muted hover:underline"
+                    >
+                      Löschen
+                    </button>
+                  </form>
+                )}
+                {userId && userId !== antwort.author_id && (
+                  <ReportButton
+                    typ="reply"
+                    zielId={antwort.id}
+                    zurueck={`/projekt/${projektId}`}
+                  />
+                )}
+              </div>
             </div>
           ))}
           {userId && antwortenOffen && (
