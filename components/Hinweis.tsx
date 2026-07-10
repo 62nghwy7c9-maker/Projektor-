@@ -33,6 +33,8 @@ const TEXTE: Record<string, string> = {
     "Der Einladungslink wurde erneuert — der alte Link ist jetzt ungültig.",
   beigetreten: "Willkommen im Projekt — du bist jetzt Mitglied!",
   gemeldet: "Danke für deine Meldung — wir schauen sie uns zeitnah an.",
+  blockiert:
+    "Nutzer blockiert — die Person kann in diesem Projekt nichts mehr posten.",
   "blockiert-vom-host":
     "Der Host dieses Projekts hat dich blockiert — ein Beitritt ist nicht möglich.",
 };

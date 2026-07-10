@@ -10,6 +10,51 @@ import {
   voteUmschalten,
 } from "@/app/projekt/ideen-actions";
 import ReportButton from "@/components/ReportButton";
+import {
+  inhaltAusblenden,
+  nutzerBlockieren,
+} from "@/app/projekt/moderation-actions";
+
+// Host-Moderationsknöpfe für eine Idee oder Antwort.
+function HostModeration({
+  typ,
+  zielId,
+  projektId,
+  autorId,
+  istAusgeblendet,
+}: {
+  typ: "idea" | "reply";
+  zielId: string;
+  projektId: string;
+  autorId: string;
+  istAusgeblendet: boolean;
+}) {
+  return (
+    <>
+      <form action={inhaltAusblenden}>
+        <input type="hidden" name="typ" value={typ} />
+        <input type="hidden" name="ziel_id" value={zielId} />
+        <input type="hidden" name="projekt_id" value={projektId} />
+        <input
+          type="hidden"
+          name="ausblenden"
+          value={istAusgeblendet ? "nein" : "ja"}
+        />
+        <button type="submit" className="text-xs text-muted hover:underline">
+          {istAusgeblendet ? "Einblenden" : "Ausblenden"}
+        </button>
+      </form>
+      <form action={nutzerBlockieren}>
+        <input type="hidden" name="projekt_id" value={projektId} />
+        <input type="hidden" name="nutzer_id" value={autorId} />
+        <input type="hidden" name="zurueck" value={`/projekt/${projektId}`} />
+        <button type="submit" className="text-xs text-muted hover:underline">
+          Nutzer blockieren
+        </button>
+      </form>
+    </>
+  );
+}
 
 export type AutorKurz = Pick<Profile, "id" | "display_name" | "avatar_url">;
 export type IdeeMitDetails = Idea & {
@@ -183,6 +228,15 @@ export default function IdeaItem({
             zurueck={`/projekt/${projektId}`}
           />
         )}
+        {istHost && !istAutor && (
+          <HostModeration
+            typ="idea"
+            zielId={idee.id}
+            projektId={projektId}
+            autorId={idee.author_id}
+            istAusgeblendet={idee.is_hidden}
+          />
+        )}
       </div>
 
       {/* Antworten — flach, genau eine Ebene */}
@@ -218,6 +272,15 @@ export default function IdeaItem({
                     typ="reply"
                     zielId={antwort.id}
                     zurueck={`/projekt/${projektId}`}
+                  />
+                )}
+                {istHost && userId !== antwort.author_id && (
+                  <HostModeration
+                    typ="reply"
+                    zielId={antwort.id}
+                    projektId={projektId}
+                    autorId={antwort.author_id}
+                    istAusgeblendet={antwort.is_hidden}
                   />
                 )}
               </div>
