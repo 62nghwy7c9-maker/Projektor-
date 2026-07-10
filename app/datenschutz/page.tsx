@@ -68,7 +68,7 @@ export default function Datenschutz() {
         <p>
           Deine Daten bleiben gespeichert, solange dein Konto besteht. Du
           kannst dein Konto jederzeit selbst löschen (Einstellungen →
-          „Konto löschen"). Dabei werden dein Zugang und deine Inhalte
+          „Konto löschen&ldquo;). Dabei werden dein Zugang und deine Inhalte
           (Profil, Projekte, Ideen, Antworten, Votes) dauerhaft entfernt.
         </p>
       </section>
