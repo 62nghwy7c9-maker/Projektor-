@@ -5,7 +5,10 @@ import type { Profile, Project } from "@/lib/types";
 import { KATEGORIEN } from "@/lib/types";
 import PhaseBadge from "@/components/PhaseBadge";
 import Avatar from "@/components/Avatar";
-import { Hinweis } from "@/components/Hinweis";
+import { Fehler, Hinweis } from "@/components/Hinweis";
+import IdeaItem, { type IdeeMitDetails } from "@/components/IdeaItem";
+import EmptyState from "@/components/EmptyState";
+import { ideePosten } from "@/app/projekt/ideen-actions";
 
 export const metadata = { title: "Projekt — Projector" };
 
@@ -14,10 +17,14 @@ export default async function ProjektSeite({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ hinweis?: string }>;
+  searchParams: Promise<{
+    hinweis?: string;
+    fehler?: string;
+    bearbeite?: string;
+  }>;
 }) {
   const { id } = await params;
-  const { hinweis } = await searchParams;
+  const { hinweis, fehler, bearbeite } = await searchParams;
   const supabase = await createClient();
 
   // RLS entscheidet, ob das Projekt für diese Person sichtbar ist.
@@ -28,16 +35,37 @@ export default async function ProjektSeite({
     .single<Project>();
   if (!projekt) notFound();
 
-  const [{ data: host }, { data: auth }] = await Promise.all([
-    supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", projekt.host_id)
-      .single<Profile>(),
-    supabase.auth.getUser(),
-  ]);
+  const [{ data: host }, { data: auth }, { data: ideenDaten }] =
+    await Promise.all([
+      supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", projekt.host_id)
+        .single<Profile>(),
+      supabase.auth.getUser(),
+      supabase
+        .from("ideas")
+        .select(
+          `*,
+           author:profiles(id, display_name, avatar_url),
+           votes:idea_votes(user_id),
+           replies:idea_replies(*, author:profiles(id, display_name, avatar_url))`,
+        )
+        .eq("project_id", id)
+        .order("created_at", { ascending: false })
+        .order("created_at", {
+          referencedTable: "idea_replies",
+          ascending: true,
+        })
+        .limit(200),
+    ]);
   const user = auth.user;
   const istHost = user?.id === projekt.host_id;
+  const ideen = (ideenDaten ?? []) as IdeeMitDetails[];
+
+  const ideenOffen =
+    projekt.phase === "brainstorming" ||
+    (projekt.phase === "laufend" && !projekt.ideas_closed);
 
   return (
     <article className="flex flex-col gap-6 py-6">
@@ -97,6 +125,75 @@ export default async function ProjektSeite({
       ) : (
         <p className="text-sm text-muted">Noch keine Beschreibung.</p>
       )}
+
+      {/* Ideen / Brainstorming */}
+      <section id="ideen" className="flex flex-col gap-4 border-t border-border pt-6">
+        <h2 className="text-xl font-bold">
+          💡 Ideen{ideen.length > 0 && ` (${ideen.length})`}
+        </h2>
+        <Fehler code={fehler} />
+
+        {ideenOffen ? (
+          user ? (
+            <form
+              action={ideePosten}
+              className="flex flex-col gap-2 rounded-xl border border-border p-4"
+            >
+              <input type="hidden" name="projekt_id" value={projekt.id} />
+              <label htmlFor="idee-body" className="label">
+                Deine Idee (max. 1.000 Zeichen)
+              </label>
+              <textarea
+                id="idee-body"
+                name="body"
+                rows={3}
+                required
+                maxLength={1000}
+                className="input"
+                placeholder="Was würde dieses Projekt voranbringen?"
+              />
+              <button type="submit" className="btn-primary self-start">
+                Idee posten
+              </button>
+            </form>
+          ) : (
+            <p className="rounded-xl border border-border p-4 text-sm text-muted">
+              <Link href="/anmelden" className="underline">
+                Melde dich an
+              </Link>
+              , um eigene Ideen beizusteuern.
+            </p>
+          )
+        ) : (
+          <p className="rounded-xl border border-border p-4 text-sm text-muted">
+            Der Ideen-Bereich ist für dieses Projekt geschlossen.
+          </p>
+        )}
+
+        {ideen.length === 0 ? (
+          <EmptyState
+            emoji="💡"
+            titel="Noch keine Ideen — leg los!"
+            text={
+              ideenOffen
+                ? "Sei die erste Person, die hier eine Idee postet."
+                : undefined
+            }
+          />
+        ) : (
+          <ul className="flex flex-col gap-3">
+            {ideen.map((idee) => (
+              <IdeaItem
+                key={idee.id}
+                idee={idee}
+                projektId={projekt.id}
+                userId={user?.id}
+                bearbeiten={bearbeite === idee.id}
+              />
+            ))}
+          </ul>
+        )}
+      </section>
     </article>
   );
 }

@@ -15,6 +15,10 @@ const TEXTE: Record<string, string> = {
     "Dieser Link ist ungültig oder abgelaufen. Bitte fordere einen neuen an.",
   "nicht-berechtigt": "Dafür fehlt dir die Berechtigung.",
   "zu-lang": "Einer der Texte ist zu lang. Bitte kürze ihn.",
+  "rate-limit":
+    "Rate-Limit erreicht: höchstens 5 Ideen pro Minute. Bitte kurz durchatmen.",
+  "posten-nicht-moeglich":
+    "Das Posten ist hier gerade nicht möglich — vielleicht ist der Ideen-Bereich geschlossen, du bist blockiert oder deine E-Mail ist noch nicht bestätigt.",
   "avatar-url": "Die Bild-URL muss mit https:// beginnen.",
   unbekannt: "Das hat leider nicht geklappt. Bitte versuche es noch einmal.",
   // Hinweise
