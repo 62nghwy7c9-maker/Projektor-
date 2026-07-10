@@ -24,6 +24,9 @@ const TEXTE: Record<string, string> = {
     "Wenn ein Konto mit dieser Adresse existiert, haben wir dir einen Link zum Zurücksetzen geschickt.",
   "passwort-geaendert": "Dein Passwort wurde geändert.",
   gespeichert: "Gespeichert!",
+  "projekt-geloescht": "Das Projekt wurde gelöscht.",
+  "link-erneuert":
+    "Der Einladungslink wurde erneuert — der alte Link ist jetzt ungültig.",
 };
 
 export function Fehler({ code }: { code?: string }) {
