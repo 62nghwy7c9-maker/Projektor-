@@ -392,17 +392,11 @@ create policy ideas_insert on public.ideas
     and not public.is_banned(auth.uid())
     and not public.is_blocked(project_id, auth.uid())
   );
+-- Nur der Autor bearbeitet seinen Text; Host/Admin moderieren über die RPCs
+-- (security definer), nicht über direkte Updates.
 create policy ideas_update on public.ideas
-  for update using (
-    author_id = auth.uid()
-    or public.is_host(project_id, auth.uid())
-    or public.is_admin(auth.uid())
-  )
-  with check (
-    author_id = auth.uid()
-    or public.is_host(project_id, auth.uid())
-    or public.is_admin(auth.uid())
-  );
+  for update using (author_id = auth.uid())
+  with check (author_id = auth.uid());
 create policy ideas_delete on public.ideas
   for delete using (author_id = auth.uid() or public.is_admin(auth.uid()));
 
@@ -425,19 +419,10 @@ create policy replies_insert on public.idea_replies
                   and public.ideas_open(i.project_id)
                   and not public.is_blocked(i.project_id, auth.uid()))
   );
+-- Nur der Autor bearbeitet seinen Text; Verstecken läuft über die RPCs.
 create policy replies_update on public.idea_replies
-  for update using (
-    author_id = auth.uid()
-    or public.is_admin(auth.uid())
-    or exists (select 1 from public.ideas i
-               where i.id = idea_id and public.is_host(i.project_id, auth.uid()))
-  )
-  with check (
-    author_id = auth.uid()
-    or public.is_admin(auth.uid())
-    or exists (select 1 from public.ideas i
-               where i.id = idea_id and public.is_host(i.project_id, auth.uid()))
-  );
+  for update using (author_id = auth.uid())
+  with check (author_id = auth.uid());
 create policy replies_delete on public.idea_replies
   for delete using (author_id = auth.uid() or public.is_admin(auth.uid()));
 
