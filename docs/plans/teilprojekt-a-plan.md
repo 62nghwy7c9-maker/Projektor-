@@ -12,10 +12,9 @@ Ein Schritt gilt erst als fertig, wenn sein **Fertig-Kriterium** tatsächlich ge
 ## Setup-Status & Fortsetzen (wichtig für neue Sessions)
 
 - ✅ Schritt 1 (Gerüst) fertig, verifiziert, gepusht.
-- 🟡 Schritt 2 (Supabase) code-seitig fertig und gepusht; **Live-Verbindung noch
-  nicht bestätigt**, weil die Netzwerk-Richtlinie dieser Umgebung Ausgang zu
-  Supabase blockierte. Entscheidung: Netzwerk-Richtlinie öffnen (Ausgang zu
-  `*.supabase.co` erlauben) und in neuer Session live verifizieren.
+- ✅ Schritt 2 (Supabase) fertig: Netzwerk-Richtlinie ist offen, `.env.local`
+  gesetzt, `/status` zeigt live „✅ Verbindung zu Supabase steht"
+  (verifiziert am 2026-07-10).
 
 **Beim Fortsetzen in einer neuen Session zuerst tun:**
 1. `.env.local` neu anlegen (wird nicht committet) mit:
