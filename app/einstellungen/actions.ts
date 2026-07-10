@@ -42,3 +42,26 @@ export async function profilSpeichern(formData: FormData) {
   revalidatePath("/", "layout");
   redirect("/einstellungen?hinweis=gespeichert");
 }
+
+export async function kontoLoeschen(formData: FormData) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/anmelden");
+
+  // Bewusste Hürde: Bestätigungswort muss exakt stimmen.
+  const bestaetigung = String(formData.get("bestaetigung") ?? "").trim();
+  if (bestaetigung !== "LÖSCHEN") {
+    redirect("/einstellungen?fehler=bestaetigung-fehlt");
+  }
+
+  // security-definer-RPC: löscht den Auth-Nutzer; Profil, Projekte, Ideen,
+  // Antworten und Votes verschwinden über die Cascade-Ketten.
+  const { error } = await supabase.rpc("delete_my_account");
+  if (error) redirect("/einstellungen?fehler=unbekannt");
+
+  await supabase.auth.signOut();
+  revalidatePath("/", "layout");
+  redirect("/?hinweis=konto-geloescht");
+}

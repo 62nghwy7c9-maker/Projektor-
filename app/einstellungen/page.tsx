@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import type { Profile } from "@/lib/types";
-import { profilSpeichern } from "./actions";
+import { kontoLoeschen, profilSpeichern } from "./actions";
 import { Fehler, Hinweis } from "@/components/Hinweis";
 
 export const metadata = { title: "Einstellungen — Projector" };
@@ -95,6 +95,31 @@ export default async function EinstellungenSeite({
           Speichern
         </button>
       </form>
+
+      <section className="mt-4 flex flex-col gap-3 rounded-xl border border-red-500/50 p-4">
+        <h2 className="font-semibold">Konto löschen</h2>
+        <p className="text-sm text-muted">
+          Löscht dein Konto dauerhaft — samt Profil, deinen Projekten, Ideen,
+          Antworten und Votes. Das lässt sich nicht rückgängig machen. Tippe
+          zur Bestätigung <strong>LÖSCHEN</strong> in das Feld.
+        </p>
+        <form action={kontoLoeschen} className="flex flex-wrap gap-2">
+          <input
+            type="text"
+            name="bestaetigung"
+            required
+            placeholder="LÖSCHEN"
+            aria-label="Bestätigungswort"
+            className="input max-w-40"
+          />
+          <button
+            type="submit"
+            className="btn border-red-500/50 text-red-600 dark:text-red-400"
+          >
+            Konto endgültig löschen
+          </button>
+        </form>
+      </section>
     </div>
   );
 }

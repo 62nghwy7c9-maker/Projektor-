@@ -35,6 +35,10 @@ const TEXTE: Record<string, string> = {
   gemeldet: "Danke für deine Meldung — wir schauen sie uns zeitnah an.",
   blockiert:
     "Nutzer blockiert — die Person kann in diesem Projekt nichts mehr posten.",
+  "bestaetigung-fehlt":
+    "Bitte tippe LÖSCHEN in das Bestätigungsfeld, um dein Konto zu löschen.",
+  "konto-geloescht":
+    "Dein Konto und deine Inhalte wurden gelöscht. Mach's gut — und komm gern wieder!",
   "blockiert-vom-host":
     "Der Host dieses Projekts hat dich blockiert — ein Beitritt ist nicht möglich.",
 };
