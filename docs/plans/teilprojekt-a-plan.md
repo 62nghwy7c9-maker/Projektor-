@@ -9,6 +9,26 @@ Ein Schritt gilt erst als fertig, wenn sein **Fertig-Kriterium** tatsächlich ge
 - 🔑 Vor Schritt 1 (für Live-URL): Vercel-Konto anlegen und mit dem GitHub-Repo verbinden.
 - 🌱 Parallel, jederzeit: Community-Ansaat (Discord o. ä.) — Kanäle = Phasen, Threads = Projekte.
 
+## Setup-Status & Fortsetzen (wichtig für neue Sessions)
+
+- ✅ Schritt 1 (Gerüst) fertig, verifiziert, gepusht.
+- 🟡 Schritt 2 (Supabase) code-seitig fertig und gepusht; **Live-Verbindung noch
+  nicht bestätigt**, weil die Netzwerk-Richtlinie dieser Umgebung Ausgang zu
+  Supabase blockierte. Entscheidung: Netzwerk-Richtlinie öffnen (Ausgang zu
+  `*.supabase.co` erlauben) und in neuer Session live verifizieren.
+
+**Beim Fortsetzen in einer neuen Session zuerst tun:**
+1. `.env.local` neu anlegen (wird nicht committet) mit:
+   - `NEXT_PUBLIC_SUPABASE_URL` = Project URL aus Supabase
+     (`https://<project-id>.supabase.co`)
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY` = Publishable/anon Key aus Supabase
+   (Kira gibt beide Werte in der neuen Session an; der Publishable-Key ist
+   öffentlich, der `sb_secret_…`-Key gehört NIE hierher.)
+2. `npm install` ausführen.
+3. Schritt 2 verifizieren: `npm run dev`, dann `/status` aufrufen — muss
+   „✅ Verbindung zu Supabase steht" zeigen. Erst dann Schritt 2 als fertig
+   markieren und mit Schritt 3 (Login) weitermachen.
+
 ## Phase 0 — Fundament
 
 **1. Projekt-Gerüst**
