@@ -15,6 +15,16 @@ Ein Schritt gilt erst als fertig, wenn sein **Fertig-Kriterium** tatsächlich ge
 - ✅ Schritt 2 (Supabase) fertig: Netzwerk-Richtlinie ist offen, `.env.local`
   gesetzt, `/status` zeigt live „✅ Verbindung zu Supabase steht"
   (verifiziert am 2026-07-10).
+- ✅ Schritte 3–16 (kompletter Code) gebaut am 2026-07-10: Auth, Profile,
+  Datenmodell inkl. RLS (`supabase/migrations/0001_init.sql`), Projekte,
+  Entdecken, Einladungslinks, Ideen/Antworten/Votes, Host-Stern/-Updates,
+  Melden/Admin, Host-Moderation, Spam-Bremsen, Rechtsseiten, Konto-Löschung,
+  Feinschliff. Verifiziert: Build + Lint grün, Routen-Verhalten live am
+  Dev-Server, Mobile-Check (375 px) über alle Seiten bestanden.
+- 🟡 **Noch offen, bevor Schritt 17 (Launch-Check) laufen kann** — Aufgaben
+  nur für Kira, siehe `docs/launch-check.md`:
+  Migration im SQL-Editor ausführen · Auth-URLs setzen · Vercel verbinden ·
+  Admin-Flag setzen · zwei bestätigte Testkonten für `scripts/rls-check.mjs`.
 
 **Beim Fortsetzen in einer neuen Session zuerst tun:**
 1. `.env.local` neu anlegen (wird nicht committet) mit:
