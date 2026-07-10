@@ -1,7 +1,13 @@
 import Link from "next/link";
 import type { Idea, IdeaReply, Profile } from "@/lib/types";
 import Avatar from "@/components/Avatar";
-import { ideeBearbeiten, ideeLoeschen } from "@/app/projekt/ideen-actions";
+import {
+  antwortLoeschen,
+  antwortPosten,
+  ideeBearbeiten,
+  ideeLoeschen,
+  voteUmschalten,
+} from "@/app/projekt/ideen-actions";
 
 export type AutorKurz = Pick<Profile, "id" | "display_name" | "avatar_url">;
 export type IdeeMitDetails = Idea & {
@@ -46,13 +52,19 @@ export default function IdeaItem({
   projektId,
   userId,
   bearbeiten,
+  antwortenOffen,
 }: {
   idee: IdeeMitDetails;
   projektId: string;
   userId?: string;
   bearbeiten?: boolean;
+  antwortenOffen?: boolean;
 }) {
   const istAutor = !!userId && idee.author_id === userId;
+  const stimmen = idee.votes.length;
+  const gevotet = !!userId && idee.votes.some((v) => v.user_id === userId);
+  // Versteckte Antworten liefert RLS ohnehin nur an Autor/Host/Admin.
+  const antworten = idee.replies;
 
   return (
     <li
@@ -95,21 +107,96 @@ export default function IdeaItem({
         <p className="whitespace-pre-line text-sm">{idee.body}</p>
       )}
 
-      {istAutor && !bearbeiten && (
-        <div className="flex gap-3 text-xs">
-          <Link
-            href={`/projekt/${projektId}?bearbeite=${idee.id}#idee-${idee.id}`}
-            className="text-muted hover:underline"
-          >
-            Bearbeiten
-          </Link>
-          <form action={ideeLoeschen}>
+      <div className="flex flex-wrap items-center gap-3 text-xs">
+        {/* Upvote — ein Vote pro Nutzer pro Idee */}
+        {userId ? (
+          <form action={voteUmschalten}>
             <input type="hidden" name="idee_id" value={idee.id} />
             <input type="hidden" name="projekt_id" value={projektId} />
-            <button type="submit" className="text-muted hover:underline">
-              Löschen
+            <input type="hidden" name="gevotet" value={gevotet ? "ja" : "nein"} />
+            <button
+              type="submit"
+              aria-pressed={gevotet}
+              className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 font-medium ${
+                gevotet
+                  ? "border-accent bg-accent/10"
+                  : "border-border hover:border-accent"
+              }`}
+            >
+              👍 {stimmen}
             </button>
           </form>
+        ) : (
+          <span className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1 font-medium text-muted">
+            👍 {stimmen}
+          </span>
+        )}
+        {istAutor && !bearbeiten && (
+          <>
+            <Link
+              href={`/projekt/${projektId}?bearbeite=${idee.id}#idee-${idee.id}`}
+              className="text-muted hover:underline"
+            >
+              Bearbeiten
+            </Link>
+            <form action={ideeLoeschen}>
+              <input type="hidden" name="idee_id" value={idee.id} />
+              <input type="hidden" name="projekt_id" value={projektId} />
+              <button type="submit" className="text-muted hover:underline">
+                Löschen
+              </button>
+            </form>
+          </>
+        )}
+      </div>
+
+      {/* Antworten — flach, genau eine Ebene */}
+      {(antworten.length > 0 || (userId && antwortenOffen)) && (
+        <div className="mt-1 flex flex-col gap-2 border-l-2 border-border pl-4">
+          {antworten.map((antwort) => (
+            <div key={antwort.id} className="flex flex-col gap-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <AutorZeile autor={antwort.author} datum={antwort.created_at} />
+                {antwort.is_hidden && (
+                  <span className="rounded-full border border-red-500/50 px-2 py-0.5 text-xs text-red-600 dark:text-red-400">
+                    Ausgeblendet
+                  </span>
+                )}
+              </div>
+              <p className="whitespace-pre-line text-sm">{antwort.body}</p>
+              {userId === antwort.author_id && (
+                <form action={antwortLoeschen}>
+                  <input type="hidden" name="antwort_id" value={antwort.id} />
+                  <input type="hidden" name="idee_id" value={idee.id} />
+                  <input type="hidden" name="projekt_id" value={projektId} />
+                  <button
+                    type="submit"
+                    className="text-xs text-muted hover:underline"
+                  >
+                    Löschen
+                  </button>
+                </form>
+              )}
+            </div>
+          ))}
+          {userId && antwortenOffen && (
+            <form action={antwortPosten} className="flex items-start gap-2">
+              <input type="hidden" name="idee_id" value={idee.id} />
+              <input type="hidden" name="projekt_id" value={projektId} />
+              <input
+                type="text"
+                name="body"
+                required
+                maxLength={1000}
+                placeholder="Antworten …"
+                aria-label="Antwort schreiben"
+                className="input"
+              />
+              <button type="submit" className="btn shrink-0">
+                Senden
+              </button>
+            </form>
+          )}
         </div>
       )}
     </li>

@@ -21,10 +21,12 @@ export default async function ProjektSeite({
     hinweis?: string;
     fehler?: string;
     bearbeite?: string;
+    sortierung?: string;
   }>;
 }) {
   const { id } = await params;
-  const { hinweis, fehler, bearbeite } = await searchParams;
+  const { hinweis, fehler, bearbeite, sortierung } = await searchParams;
+  const sortiereTop = sortierung === "top";
   const supabase = await createClient();
 
   // RLS entscheidet, ob das Projekt für diese Person sichtbar ist.
@@ -61,7 +63,15 @@ export default async function ProjektSeite({
     ]);
   const user = auth.user;
   const istHost = user?.id === projekt.host_id;
-  const ideen = (ideenDaten ?? []) as IdeeMitDetails[];
+  let ideen = (ideenDaten ?? []) as IdeeMitDetails[];
+  if (sortiereTop) {
+    // "Top": nach Stimmen, bei Gleichstand nach Datum (neueste zuerst).
+    ideen = [...ideen].sort(
+      (a, b) =>
+        b.votes.length - a.votes.length ||
+        Date.parse(b.created_at) - Date.parse(a.created_at),
+    );
+  }
 
   const ideenOffen =
     projekt.phase === "brainstorming" ||
@@ -128,9 +138,33 @@ export default async function ProjektSeite({
 
       {/* Ideen / Brainstorming */}
       <section id="ideen" className="flex flex-col gap-4 border-t border-border pt-6">
-        <h2 className="text-xl font-bold">
-          💡 Ideen{ideen.length > 0 && ` (${ideen.length})`}
-        </h2>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-xl font-bold">
+            💡 Ideen{ideen.length > 0 && ` (${ideen.length})`}
+          </h2>
+          {ideen.length > 1 && (
+            <div className="flex gap-1 rounded-lg border border-border p-0.5 text-xs">
+              <Link
+                href={`/projekt/${projekt.id}#ideen`}
+                aria-current={!sortiereTop ? "true" : undefined}
+                className={`rounded-md px-3 py-1 font-medium ${
+                  !sortiereTop ? "bg-accent text-white" : "hover:bg-accent/10"
+                }`}
+              >
+                Neueste
+              </Link>
+              <Link
+                href={`/projekt/${projekt.id}?sortierung=top#ideen`}
+                aria-current={sortiereTop ? "true" : undefined}
+                className={`rounded-md px-3 py-1 font-medium ${
+                  sortiereTop ? "bg-accent text-white" : "hover:bg-accent/10"
+                }`}
+              >
+                Top
+              </Link>
+            </div>
+          )}
+        </div>
         <Fehler code={fehler} />
 
         {ideenOffen ? (
@@ -189,6 +223,7 @@ export default async function ProjektSeite({
                 projektId={projekt.id}
                 userId={user?.id}
                 bearbeiten={bearbeite === idee.id}
+                antwortenOffen={ideenOffen}
               />
             ))}
           </ul>
