@@ -5,15 +5,19 @@ import type { Profile, Project } from "@/lib/types";
 import { KATEGORIEN } from "@/lib/types";
 import PhaseBadge from "@/components/PhaseBadge";
 import Avatar from "@/components/Avatar";
+import { Hinweis } from "@/components/Hinweis";
 
 export const metadata = { title: "Projekt — Projector" };
 
 export default async function ProjektSeite({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ hinweis?: string }>;
 }) {
   const { id } = await params;
+  const { hinweis } = await searchParams;
   const supabase = await createClient();
 
   // RLS entscheidet, ob das Projekt für diese Person sichtbar ist.
@@ -37,6 +41,7 @@ export default async function ProjektSeite({
 
   return (
     <article className="flex flex-col gap-6 py-6">
+      <Hinweis code={hinweis} />
       {projekt.cover_url && (
         // eslint-disable-next-line @next/next/no-img-element -- freie Nutzer-URLs, keine Domain-Allowlist für next/image
         <img

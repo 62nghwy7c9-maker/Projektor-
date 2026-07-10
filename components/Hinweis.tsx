@@ -27,6 +27,9 @@ const TEXTE: Record<string, string> = {
   "projekt-geloescht": "Das Projekt wurde gelöscht.",
   "link-erneuert":
     "Der Einladungslink wurde erneuert — der alte Link ist jetzt ungültig.",
+  beigetreten: "Willkommen im Projekt — du bist jetzt Mitglied!",
+  "blockiert-vom-host":
+    "Der Host dieses Projekts hat dich blockiert — ein Beitritt ist nicht möglich.",
 };
 
 export function Fehler({ code }: { code?: string }) {
