@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Header from "@/components/Header";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -16,18 +17,7 @@ export default function RootLayout({
   return (
     <html lang="de" className="h-full antialiased">
       <body className="min-h-full flex flex-col bg-background text-foreground">
-        <header className="border-b border-border">
-          <div className="mx-auto flex h-14 w-full max-w-5xl items-center justify-between px-4">
-            <Link href="/" className="text-lg font-bold tracking-tight">
-              💡 Projector
-            </Link>
-            <nav className="flex items-center gap-4 text-sm">
-              <Link href="/" className="hover:underline">
-                Entdecken
-              </Link>
-            </nav>
-          </div>
-        </header>
+        <Header />
         <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6">
           {children}
         </main>

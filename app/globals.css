@@ -26,6 +26,21 @@
   }
 }
 
+@layer components {
+  .input {
+    @apply w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-accent;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center gap-1 rounded-lg border border-border px-4 py-2 text-sm font-medium hover:border-accent disabled:opacity-50;
+  }
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-1 rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50;
+  }
+  .label {
+    @apply block text-sm font-medium;
+  }
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
