@@ -6,6 +6,7 @@ import {
   antwortPosten,
   ideeBearbeiten,
   ideeLoeschen,
+  sternUmschalten,
   voteUmschalten,
 } from "@/app/projekt/ideen-actions";
 
@@ -53,12 +54,14 @@ export default function IdeaItem({
   userId,
   bearbeiten,
   antwortenOffen,
+  istHost,
 }: {
   idee: IdeeMitDetails;
   projektId: string;
   userId?: string;
   bearbeiten?: boolean;
   antwortenOffen?: boolean;
+  istHost?: boolean;
 }) {
   const istAutor = !!userId && idee.author_id === userId;
   const stimmen = idee.votes.length;
@@ -75,11 +78,21 @@ export default function IdeaItem({
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
         <AutorZeile autor={idee.author} datum={idee.created_at} />
-        {idee.is_hidden && (
-          <span className="rounded-full border border-red-500/50 px-2 py-0.5 text-xs text-red-600 dark:text-red-400">
-            Ausgeblendet — nur für dich sichtbar
-          </span>
-        )}
+        <span className="flex items-center gap-2">
+          {idee.is_starred && (
+            <span
+              className="rounded-full border border-amber-500/50 bg-amber-500/10 px-2 py-0.5 text-xs font-medium"
+              title="Vom Host aufgegriffen"
+            >
+              ⭐ Vom Host aufgegriffen
+            </span>
+          )}
+          {idee.is_hidden && (
+            <span className="rounded-full border border-red-500/50 px-2 py-0.5 text-xs text-red-600 dark:text-red-400">
+              Ausgeblendet — nur für dich sichtbar
+            </span>
+          )}
+        </span>
       </div>
 
       {istAutor && bearbeiten ? (
@@ -130,6 +143,20 @@ export default function IdeaItem({
           <span className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1 font-medium text-muted">
             👍 {stimmen}
           </span>
+        )}
+        {istHost && (
+          <form action={sternUmschalten}>
+            <input type="hidden" name="idee_id" value={idee.id} />
+            <input type="hidden" name="projekt_id" value={projektId} />
+            <input
+              type="hidden"
+              name="gestirnt"
+              value={idee.is_starred ? "ja" : "nein"}
+            />
+            <button type="submit" className="text-muted hover:underline">
+              {idee.is_starred ? "⭐ Stern entfernen" : "⭐ Stern setzen"}
+            </button>
+          </form>
         )}
         {istAutor && !bearbeiten && (
           <>

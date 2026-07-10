@@ -6,9 +6,18 @@ import { KATEGORIEN } from "@/lib/types";
 import PhaseBadge from "@/components/PhaseBadge";
 import Avatar from "@/components/Avatar";
 import { Fehler, Hinweis } from "@/components/Hinweis";
-import IdeaItem, { type IdeeMitDetails } from "@/components/IdeaItem";
+import IdeaItem, {
+  AutorZeile,
+  type AutorKurz,
+  type IdeeMitDetails,
+} from "@/components/IdeaItem";
 import EmptyState from "@/components/EmptyState";
-import { ideePosten } from "@/app/projekt/ideen-actions";
+import {
+  ideePosten,
+  updateLoeschen,
+  updatePosten,
+} from "@/app/projekt/ideen-actions";
+import type { ProjectUpdate } from "@/lib/types";
 
 export const metadata = { title: "Projekt — Projector" };
 
@@ -37,7 +46,7 @@ export default async function ProjektSeite({
     .single<Project>();
   if (!projekt) notFound();
 
-  const [{ data: host }, { data: auth }, { data: ideenDaten }] =
+  const [{ data: host }, { data: auth }, { data: ideenDaten }, { data: updatesDaten }] =
     await Promise.all([
       supabase
         .from("profiles")
@@ -60,6 +69,12 @@ export default async function ProjektSeite({
           ascending: true,
         })
         .limit(200),
+      supabase
+        .from("project_updates")
+        .select("*, author:profiles(id, display_name, avatar_url)")
+        .eq("project_id", id)
+        .order("created_at", { ascending: false })
+        .limit(50),
     ]);
   const user = auth.user;
   const istHost = user?.id === projekt.host_id;
@@ -72,6 +87,10 @@ export default async function ProjektSeite({
         Date.parse(b.created_at) - Date.parse(a.created_at),
     );
   }
+
+  const updates = (updatesDaten ?? []) as (ProjectUpdate & {
+    author: AutorKurz | null;
+  })[];
 
   const ideenOffen =
     projekt.phase === "brainstorming" ||
@@ -134,6 +153,79 @@ export default async function ProjektSeite({
         </p>
       ) : (
         <p className="text-sm text-muted">Noch keine Beschreibung.</p>
+      )}
+
+      {/* Host-Updates */}
+      {(updates.length > 0 || istHost) && (
+        <section
+          id="updates"
+          className="flex flex-col gap-3 border-t border-border pt-6"
+        >
+          <h2 className="text-xl font-bold">📣 Updates vom Host</h2>
+          {istHost && (
+            <form
+              action={updatePosten}
+              className="flex flex-col gap-2 rounded-xl border border-border p-4"
+            >
+              <input type="hidden" name="projekt_id" value={projekt.id} />
+              <label htmlFor="update-body" className="label">
+                Neues Status-Update
+              </label>
+              <textarea
+                id="update-body"
+                name="body"
+                rows={2}
+                required
+                maxLength={2000}
+                className="input"
+                placeholder="Was gibt es Neues im Projekt?"
+              />
+              <button type="submit" className="btn-primary self-start">
+                Update posten
+              </button>
+            </form>
+          )}
+          {updates.length === 0 ? (
+            <p className="text-sm text-muted">
+              Noch keine Updates — poste das erste!
+            </p>
+          ) : (
+            <ul className="flex flex-col gap-3">
+              {updates.map((update) => (
+                <li
+                  key={update.id}
+                  className="flex flex-col gap-1 rounded-xl border border-border p-4"
+                >
+                  <AutorZeile
+                    autor={update.author}
+                    datum={update.created_at}
+                  />
+                  <p className="whitespace-pre-line text-sm">{update.body}</p>
+                  {istHost && (
+                    <form action={updateLoeschen}>
+                      <input
+                        type="hidden"
+                        name="update_id"
+                        value={update.id}
+                      />
+                      <input
+                        type="hidden"
+                        name="projekt_id"
+                        value={projekt.id}
+                      />
+                      <button
+                        type="submit"
+                        className="self-start text-xs text-muted hover:underline"
+                      >
+                        Löschen
+                      </button>
+                    </form>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
       )}
 
       {/* Ideen / Brainstorming */}
@@ -224,6 +316,7 @@ export default async function ProjektSeite({
                 userId={user?.id}
                 bearbeiten={bearbeite === idee.id}
                 antwortenOffen={ideenOffen}
+                istHost={istHost}
               />
             ))}
           </ul>
